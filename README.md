@@ -1,3 +1,15 @@
 # MIOTPVerificationSPM
 
-A description of this package.
+This package is used for validating the OTP fields.
+
+In this package there is only two classes one for OTP view and another for OTPTextFields, and also there is some extensions which is usefull for this package. 
+
+For using this package please follow below steps.
+
+1. First add this package to your project.
+2. Then add view in your storyboard or XIB.
+3. Give to OTPView.
+4. Import MIOTPVerificationSPM to your ViewController.
+5. Take the IBOutlet for that view.
+6. Now you can access all properties from your ViewController as well from Storyboard or XIB.
+7. Add two images in your storyboard which you want to add for secure symbol with the name of "ic_dot" and "ic_star".
