@@ -395,7 +395,7 @@ extension OTPView: UITextFieldDelegate {
                 imageAttachment.bounds = CGRect(x: 0, y: 0, width: (textField.text?.widthOfString(usingFont: fieldFont) ?? 0), height: (textField.text?.widthOfString(usingFont: fieldFont) ?? 0))
                 let imageString = NSAttributedString(attachment: imageAttachment)
                 fullString.append(imageString)
-                if let lbl = self.viewWithTag(textField.tag + fieldsCount) as? UILabel {
+                if let lbl = self.viewWithTag(textField.tag + fieldsCount) as? UILabel, secureEntrySymbol != .none {
                     
                     lbl.textAlignment = .center
                     lbl.attributedText = fullString

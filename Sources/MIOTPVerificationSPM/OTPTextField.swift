@@ -46,20 +46,22 @@ class OTPTextField: UITextField {
             addBottomView()
         }
         
-        let imageAttachment = NSTextAttachment(data: nil, ofType: nil)
-        let origImage = UIImage(named: placeholderText)
-        let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
-        if #available(iOS 13.0, *) {
-            imageAttachment.image = tintedImage
-        } else {
-            imageAttachment.image = tintedImage?.imageWithColor(color: placeholderColor)
+        if placeholderText != "" {
+            let imageAttachment = NSTextAttachment(data: nil, ofType: nil)
+            let origImage = UIImage(named: placeholderText)
+            let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
+            if #available(iOS 13.0, *) {
+                imageAttachment.image = tintedImage
+            } else {
+                imageAttachment.image = tintedImage?.imageWithColor(color: placeholderColor)
+            }
+            let strFinal = NSAttributedString(attachment: imageAttachment)
+            let attributedText = NSMutableAttributedString(attributedString: strFinal)
+            if #available(iOS 13.0, *) {
+                attributedText.addAttributes([NSAttributedString.Key.foregroundColor: placeholderColor], range: NSMakeRange(0, attributedText.length))
+            }
+            self.attributedPlaceholder = attributedText
         }
-        let strFinal = NSAttributedString(attachment: imageAttachment)
-        let attributedText = NSMutableAttributedString(attributedString: strFinal)
-        if #available(iOS 13.0, *) {
-            attributedText.addAttributes([NSAttributedString.Key.foregroundColor: placeholderColor], range: NSMakeRange(0, attributedText.length))
-        }
-        self.attributedPlaceholder = attributedText
         
         if type == .box || type == .round {
             layer.borderColor = borderColor.cgColor
