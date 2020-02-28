@@ -352,6 +352,16 @@ extension OTPView {
             }
         }
     }
+    
+    // For clear all entered OTP
+    public func clearOTP() {
+        
+        for index in stride(from: 0, to: fieldsCount, by: 1) {
+            
+            let oldOtpField = viewWithTag(index + 1) as? OTPTextField
+            self.deleteText(in: oldOtpField!)
+        }
+    }
 }
 
 extension OTPView: UITextFieldDelegate {
