@@ -275,6 +275,7 @@ extension OTPView {
             _ = delegate?.hasEnteredAllOTP(hasEntered: false)
             
             if numberOfEnteredField > 0, textField.text != "" {
+                textField.text = ""
                 self.numberOfEnteredField -= 1
             }
             
@@ -508,7 +509,6 @@ extension OTPView: UITextFieldDelegate {
         
         // Get the entered string
         calculateEnteredOTPString(isDeleted: true, textField: textField)
-        textField.text = ""
         
         textField.becomeFirstResponder()
     }
