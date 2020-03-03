@@ -135,6 +135,10 @@ open class OTPView: UIView {
     @IBInspectable
     open var textColor: UIColor = .black
     
+    /// For first text field become first responder at load time
+    @IBInspectable
+    open var isTextfieldBecomFirstResponder = false
+    
     open weak var delegate: OTPViewDelegate?
     
     fileprivate var enteredOTP = [String]()
@@ -175,6 +179,10 @@ extension OTPView {
             addSubview(otpField)
             
             enteredOTP.append("")
+        }
+        
+        if let txtField = self.viewWithTag(numberOfEnteredField + 1) as? OTPTextField, isTextfieldBecomFirstResponder {
+            txtField.becomeFirstResponder()
         }
     }
     
@@ -260,13 +268,15 @@ extension OTPView {
     }
     
     // Helper function to get the OTP String entered
-    fileprivate func calculateEnteredOTPString(isDeleted: Bool) {
+    fileprivate func calculateEnteredOTPString(isDeleted: Bool, textField: UITextField) {
         
         if isDeleted {
             
             _ = delegate?.hasEnteredAllOTP(hasEntered: false)
             
-            self.numberOfEnteredField -= 1
+            if numberOfEnteredField > 0, textField.text != "" {
+                self.numberOfEnteredField -= 1
+            }
             
             // Set the default enteres state for otp entry
             for index in stride(from: 0, to: fieldsCount, by: 1) {
@@ -370,10 +380,30 @@ extension OTPView: UITextFieldDelegate {
         
         let shouldBeginEditing = delegate?.shouldBecomeFirstResponderForOTP(otpFieldIndex: (textField.tag - 1)) ?? true
         if shouldBeginEditing {
-            return isPreviousFieldsEntered(forTextField: textField)
+            
+            if shouldAllowIntermediateEditing {
+                return isPreviousFieldsEntered(forTextField: textField)
+            } else {
+                return true
+            }
         }
         
         return shouldBeginEditing
+    }
+    
+    public func textFieldDidBeginEditing(_ textField: UITextField) {
+        
+        if !shouldAllowIntermediateEditing {
+            if let txtField = self.viewWithTag(numberOfEnteredField + 1) as? OTPTextField, textField != txtField, textField.text == "" {
+                DispatchQueue.main.async {
+                    txtField.becomeFirstResponder()
+                }
+            } else if let txtField = self.viewWithTag(numberOfEnteredField) as? OTPTextField, textField != txtField, textField.text != "" {
+                DispatchQueue.main.async {
+                    txtField.becomeFirstResponder()
+                }
+            }
+        }
     }
     
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -393,8 +423,13 @@ extension OTPView: UITextFieldDelegate {
                 
                 let fullString = NSMutableAttributedString(string: "")
                 let imageAttachment = NSTextAttachment()
-                textField.text = "M"
-                textField.textColor = enteredFieldBackgroundColor
+                if secureEntrySymbol != .none {
+                    textField.text = "M"
+                    textField.textColor = enteredFieldBackgroundColor
+                } else {
+                    textField.text = string
+                    textField.textColor = textColor
+                }
                 let origImage = UIImage(named: secureEntrySymbol.rawValue)
                 let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
                 if #available(iOS 13.0, *) {
@@ -408,7 +443,9 @@ extension OTPView: UITextFieldDelegate {
                 if let lbl = self.viewWithTag(textField.tag + fieldsCount) as? UILabel, secureEntrySymbol != .none {
                     
                     lbl.textAlignment = .center
-                    lbl.attributedText = fullString
+                    if secureEntrySymbol != .none {
+                        lbl.attributedText = fullString
+                    }
                     if #available(iOS 13.0, *) {
                         lbl.textColor = secureEntrySymbolColor
                     }
@@ -426,14 +463,14 @@ extension OTPView: UITextFieldDelegate {
             
             let nextOTPField = viewWithTag(textField.tag + 1)
             
+            // Get the entered string
+            calculateEnteredOTPString(isDeleted: false, textField: textField)
+            
             if let nextOTPField = nextOTPField {
                 nextOTPField.becomeFirstResponder()
             } else {
                 textField.resignFirstResponder()
             }
-            
-            // Get the entered string
-            calculateEnteredOTPString(isDeleted: false)
         } else {
             
             let currentText = textField.text ?? ""
@@ -461,7 +498,6 @@ extension OTPView: UITextFieldDelegate {
         
         // If deleting the text, then move to previous text field if present
         enteredOTP[textField.tag - 1] = ""
-        textField.text = ""
         
         if let lbl = self.viewWithTag(textField.tag + fieldsCount) as? UILabel {
             lbl.text = ""
@@ -470,10 +506,11 @@ extension OTPView: UITextFieldDelegate {
         textField.backgroundColor = emptyFieldBackgroundColor
         textField.layer.borderColor = emptyFieldBorderColor.cgColor
         
-        textField.becomeFirstResponder()
-        
         // Get the entered string
-        calculateEnteredOTPString(isDeleted: true)
+        calculateEnteredOTPString(isDeleted: true, textField: textField)
+        textField.text = ""
+        
+        textField.becomeFirstResponder()
     }
 }
 
