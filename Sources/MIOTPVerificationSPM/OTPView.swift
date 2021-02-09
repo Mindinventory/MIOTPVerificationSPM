@@ -182,7 +182,10 @@ extension OTPView {
         }
         
         if let txtField = self.viewWithTag(numberOfEnteredField + 1) as? OTPTextField, isTextfieldBecomFirstResponder {
-            txtField.becomeFirstResponder()
+            
+            DispatchQueue.main.async {
+                txtField.becomeFirstResponder()
+            }
         }
     }
     
