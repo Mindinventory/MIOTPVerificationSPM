@@ -412,8 +412,8 @@ extension OTPView: UITextFieldDelegate {
     
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
-        let replacedText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? ""
-        
+        let replacedText = (textField.text as NSString?)?.replacingCharacters(in: NSRange(location: 0, length: textField.text?.count ?? 0), with: string) ?? ""
+
         // Check since only alphabet keyboard is not available in iOS
         if !replacedText.isEmpty && fieldInputType == .alphabet && replacedText.rangeOfCharacter(from: .letters) == nil {
             return false
